@@ -1,0 +1,170 @@
+StudentManagementSystem.java
+import java.io.*;
+import java.util.*;
+
+public class StudentManagementSystem {
+
+    private ArrayList<Student> students;
+    private Scanner sc;
+
+    public StudentManagementSystem() {
+        students = new ArrayList<>();
+        sc = new Scanner(System.in);
+        loadFromFile();
+    }
+
+    public void addStudent() {
+        System.out.print("Enter Roll Number: ");
+        int roll = sc.nextInt();
+        sc.nextLine();
+
+        for (Student s : students) {
+            if (s.getRollNo() == roll) {
+                System.out.println("Student with this roll number already exists!");
+                return;
+            }
+        }
+
+        System.out.print("Enter Name: ");
+        String name = sc.nextLine();
+
+        System.out.print("Enter Grade: ");
+        String grade = sc.nextLine();
+
+        students.add(new Student(roll, name, grade));
+        saveToFile();
+        System.out.println("Student added successfully!");
+    }
+
+    public void removeStudent() {
+        System.out.print("Enter Roll Number to remove: ");
+        int roll = sc.nextInt();
+
+        Iterator<Student> itr = students.iterator();
+        while (itr.hasNext()) {
+            Student s = itr.next();
+            if (s.getRollNo() == roll) {
+                itr.remove();
+                saveToFile();
+                System.out.println("Student removed successfully!");
+                return;
+            }
+        }
+        System.out.println("Student not found!");
+    }
+
+    public void searchStudent() {
+        System.out.print("Enter Roll Number to search: ");
+        int roll = sc.nextInt();
+
+        for (Student s : students) {
+            if (s.getRollNo() == roll) {
+                System.out.println(s);
+                return;
+            }
+        }
+        System.out.println("Student not found!");
+    }
+
+    public void displayStudents() {
+        if (students.isEmpty()) {
+            System.out.println("No students available!");
+            return;
+        }
+        for (Student s : students) {
+            System.out.println(s);
+        }
+    }
+
+    private void saveToFile() {
+        try (ObjectOutputStream oos =
+                     new ObjectOutputStream(new FileOutputStream("students.dat"))) {
+            oos.writeObject(students);
+        } catch (IOException e) {
+            System.out.println("Error saving data!");
+        }
+    }
+
+    private void loadFromFile() {
+        try (ObjectInputStream ois =
+                     new ObjectInputStream(new FileInputStream("students.dat"))) {
+            students = (ArrayList<Student>) ois.readObject();
+        } catch (Exception e) {
+            students = new ArrayList<>();
+        }
+    }
+
+    public void start() {
+        while (true) {
+            System.out.println("\n--- Student Management System ---");
+            System.out.println("1. Add Student");
+            System.out.println("2. Remove Student");
+            System.out.println("3. Search Student");
+            System.out.println("4. Display All Students");
+            System.out.println("5. Exit");
+            System.out.print("Choose option: ");
+
+            int choice = sc.nextInt();
+
+            switch (choice) {
+                case 1 -> addStudent();
+                case 2 -> removeStudent();
+                case 3 -> searchStudent();
+                case 4 -> displayStudents();
+                case 5 -> {
+                    System.out.println("Exiting...");
+                    System.exit(0);
+                }
+                default -> System.out.println("Invalid choice!");
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        new StudentManagementSystem().start();
+    }
+}
+
+
+
+Student.java
+import java.io.Serializable;
+
+public class Student implements Serializable {
+    private int rollNo;
+    private String name;
+    private String grade;
+
+    public Student(int rollNo, String name, String grade) {
+        this.rollNo = rollNo;
+        this.name = name;
+        this.grade = grade;
+    }
+
+    public int getRollNo() {
+        return rollNo;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getGrade() {
+        return grade;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setGrade(String grade) {
+        this.grade = grade;
+    }
+
+    @Override
+    public String toString() {
+        return "Roll No: " + rollNo +
+               ", Name: " + name +
+               ", Grade: " + grade;
+    }
+}
